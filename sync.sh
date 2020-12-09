@@ -5,7 +5,7 @@ FAILED_MESSAGE=""
 
 GITEA_TOKEN=${GITEA_TOKEN:?is not set}
 GITHUB_TOKEN=${GITHUB_TOKEN:?is not set}
-# BITBUCKET_TOKEN=${BITBUCKET_TOKEN:?is not set}
+BITBUCKET_TOKEN=${BITBUCKET_TOKEN:?is not set}
 GITLAB_TOKEN=${GITLAB_TOKEN:?is not set}
 
 GITEA_BASE="https://averagemarcus:${GITEA_TOKEN}@git.cluster.fun/AverageMarcus/"
@@ -26,18 +26,18 @@ githubMakeRepo() {
   curl -X POST -f -u averagemarcus:${GITHUB_TOKEN} "https://api.github.com/user/repos" -H  "accept: application/vnd.github.v3+json" -d '{"name": "'${1}'", "private": false, "auto_init": false, "delete_branch_on_merge": true}' --silent
 }
 
-# bitbucketGetRepo() {
-
-# }
-# bitbucketMakeRepo() {
-
-# }
+bitbucketGetRepo() {
+  curl -f "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}"
+}
+bitbucketMakeRepo() {
+  curl -X POST -H "Content-Type: application/json" -d '{"scm": "git", "is_private": false,"project": {"key": "PROJ"}}' "https://api.bitbucket.org/2.0/repositories/averagemarcus/${0}"
+}
 
 gitlabGetRepo() {
-  curl -f --silent "https://gitlab.com/api/v4/projects/averagemarcus/${1}?access_token=${GITLAB_TOKEN}"
+  curl -f --silent -u averagemarcus:${BITBUCKET_TOKEN} "https://gitlab.com/api/v4/projects/averagemarcus/${1}?access_token=${GITLAB_TOKEN}"
 }
 gitlabMakeRepo() {
-curl -X POST -f "https://gitlab.com/api/v4/projects?access_token=${GITLAB_TOKEN}" -d '{"name": "'${1}'", "visibility": "public"}' --silent
+curl -X POST -u averagemarcus:${BITBUCKET_TOKEN} "https://gitlab.com/api/v4/projects?access_token=${GITLAB_TOKEN}" -d '{"name": "'${1}'", "visibility": "public"}' --silent
 }
 
 for REPO in ${REPOS}; do
@@ -52,7 +52,7 @@ for REPO in ${REPOS}; do
 
   git remote add gitea "${GITEA_BASE}${REPO}"
   git remote add github "${GITHUB_BASE}${REPO}"
-  # git remote add bitbucket "${BITBUCKET_BASE}${REPO}"
+  git remote add bitbucket "${BITBUCKET_BASE}${REPO}"
   git remote add gitlab "${GITLAB_BASE}${REPO}"
 
   failed() {
@@ -66,15 +66,16 @@ for REPO in ${REPOS}; do
 
   githubGetRepo ${REPO} || githubMakeRepo ${REPO}
   gitlabGetRepo ${REPO} || gitlabMakeRepo ${REPO}
+  bitbucketGetRepo ${REPO} || bitbucketMakeRepo ${REPO}
 
   git pull --ff-only gitea ${BRANCH} || failed
   git pull --ff-only github ${BRANCH} || printf "\nℹ️ Unable to pull from GitHub\n\n"
-  # git pull --ff-only bitbucket ${BRANCH} || printf "\nℹ️ Unable to pull from BitBucket\n\n"
+  git pull --ff-only bitbucket ${BRANCH} || printf "\nℹ️ Unable to pull from BitBucket\n\n"
   git pull --ff-only gitlab ${BRANCH} || printf "\nℹ️ Unable to pull from Gitlab\n\n"
 
   git push gitea ${BRANCH} || failed
   git push github ${BRANCH} || failed
-  # git push bitbucket ${BRANCH} || failed
+  git push bitbucket ${BRANCH} || failed
   git push gitlab ${BRANCH} || failed
 
   cd ..
