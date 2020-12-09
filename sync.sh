@@ -10,8 +10,8 @@ GITLAB_TOKEN=${GITLAB_TOKEN:?is not set}
 
 GITEA_BASE="https://averagemarcus:${GITEA_TOKEN}@git.cluster.fun/AverageMarcus/"
 GITHUB_BASE="https://averagemarcus:${GITHUB_TOKEN}@github.com/AverageMarcus/"
-BITBUCKET_BASE="https://bitbucket.org/AverageMarcus/"
-GITLAB_BASE="https://gitlab.com/AverageMarcus/"
+BITBUCKET_BASE="https://averagemarcus:${BITBUCKET_TOKEN}@bitbucket.org/AverageMarcus/"
+GITLAB_BASE="https://averagemarcus:${GITLAB_TOKEN}@gitlab.com/AverageMarcus/"
 
 REPOS=$(curl -X GET "https://git.cluster.fun/api/v1/user/repos?page=1&limit=50&access_token=${GITEA_TOKEN}" -H  "accept: application/json" --silent | jq -r '.[] | select(.private!=true) | .name')
 
@@ -27,17 +27,17 @@ githubMakeRepo() {
 }
 
 bitbucketGetRepo() {
-  curl -f "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}"
+  curl -f -u averagemarcus:${BITBUCKET_TOKEN} "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}"
 }
 bitbucketMakeRepo() {
-  curl -X POST -H "Content-Type: application/json" -d '{"scm": "git", "is_private": false,"project": {"key": "PROJ"}}' "https://api.bitbucket.org/2.0/repositories/averagemarcus/${0}"
+  curl -X POST -u averagemarcus:${BITBUCKET_TOKEN} -H "Content-Type: application/json" -d '{"scm": "git", "is_private": false,"project": {"key": "PROJ"}}' "https://api.bitbucket.org/2.0/repositories/averagemarcus/${0}"
 }
 
 gitlabGetRepo() {
-  curl -f --silent -u averagemarcus:${BITBUCKET_TOKEN} "https://gitlab.com/api/v4/projects/averagemarcus/${1}?access_token=${GITLAB_TOKEN}"
+  curl -f --silent "https://gitlab.com/api/v4/projects/averagemarcus/${1}?access_token=${GITLAB_TOKEN}"
 }
 gitlabMakeRepo() {
-curl -X POST -u averagemarcus:${BITBUCKET_TOKEN} "https://gitlab.com/api/v4/projects?access_token=${GITLAB_TOKEN}" -d '{"name": "'${1}'", "visibility": "public"}' --silent
+curl -X POST "https://gitlab.com/api/v4/projects?access_token=${GITLAB_TOKEN}" -d '{"name": "'${1}'", "visibility": "public"}' --silent
 }
 
 for REPO in ${REPOS}; do
