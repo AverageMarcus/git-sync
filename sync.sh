@@ -6,11 +6,11 @@ FAILED_MESSAGE=""
 GITEA_TOKEN=${GITEA_TOKEN:?is not set}
 GITHUB_TOKEN=${GITHUB_TOKEN:?is not set}
 # BITBUCKET_TOKEN=${BITBUCKET_TOKEN:?is not set}
-# GITLAB_TOKEN=${GITLAB_TOKEN:?is not set}
+GITLAB_TOKEN=${GITLAB_TOKEN:?is not set}
 
 GITEA_BASE="https://averagemarcus:${GITEA_TOKEN}@git.cluster.fun/AverageMarcus/"
 GITHUB_BASE="https://averagemarcus:${GITHUB_TOKEN}@github.com/AverageMarcus/"
-BITBUCKET_BASE="https://bitbucket.org/marcusnoble/"
+BITBUCKET_BASE="https://bitbucket.org/AverageMarcus/"
 GITLAB_BASE="https://gitlab.com/AverageMarcus/"
 
 REPOS=$(curl -X GET "https://git.cluster.fun/api/v1/user/repos?page=1&limit=50&access_token=${GITEA_TOKEN}" -H  "accept: application/json" --silent | jq -r '.[] | select(.private!=true) | .name')
@@ -33,12 +33,12 @@ githubMakeRepo() {
 
 # }
 
-# gitlabGetRepo() {
-
-# }
-# gitlabMakeRepo() {
-
-# }
+gitlabGetRepo() {
+  curl -f --silent "https://gitlab.com/api/v4/projects/averagemarcus/${1}?access_token=${GITLAB_TOKEN}"
+}
+gitlabMakeRepo() {
+curl -X POST -f "https://gitlab.com/api/v4/projects?access_token=${GITLAB_TOKEN}" -d '{"name": "'${1}'", "visibility": "public"}' --silent
+}
 
 for REPO in ${REPOS}; do
   echo "Syncing ${REPO}"
@@ -53,7 +53,7 @@ for REPO in ${REPOS}; do
   git remote add gitea "${GITEA_BASE}${REPO}"
   git remote add github "${GITHUB_BASE}${REPO}"
   # git remote add bitbucket "${BITBUCKET_BASE}${REPO}"
-  # git remote add gitlab "${GITLAB_BASE}${REPO}"
+  git remote add gitlab "${GITLAB_BASE}${REPO}"
 
   failed() {
     EXIT_CODE=1
@@ -65,16 +65,17 @@ for REPO in ${REPOS}; do
   }
 
   githubGetRepo ${REPO} || githubMakeRepo ${REPO}
+  gitlabGetRepo ${REPO} || gitlabMakeRepo ${REPO}
 
   git pull --ff-only gitea ${BRANCH} || failed
   git pull --ff-only github ${BRANCH} || printf "\nℹ️ Unable to pull from GitHub\n\n"
   # git pull --ff-only bitbucket ${BRANCH} || printf "\nℹ️ Unable to pull from BitBucket\n\n"
-  # git pull --ff-only gitlab ${BRANCH} || printf "\nℹ️ Unable to pull from Gitlab\n\n"
+  git pull --ff-only gitlab ${BRANCH} || printf "\nℹ️ Unable to pull from Gitlab\n\n"
 
   git push gitea ${BRANCH} || failed
   git push github ${BRANCH} || failed
   # git push bitbucket ${BRANCH} || failed
-  # git push gitlab ${BRANCH} || failed
+  git push gitlab ${BRANCH} || failed
 
   cd ..
   rm -rf ${REPO}
