@@ -83,5 +83,5 @@ for REPO in ${REPOS}; do
   printf "\n✅ Successfully synced ${REPO}\n\n"
 done
 
-echo ${FAILED_MESSAGE}
+printf ${FAILED_MESSAGE}
 exit ${EXIT_CODE}
