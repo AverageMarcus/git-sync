@@ -1,6 +1,7 @@
 #!/bin/bash
 
 EXIT_CODE=0
+FAILED_MESSAGE=""
 
 GITEA_TOKEN=${GITEA_TOKEN:?is not set}
 GITHUB_TOKEN=${GITHUB_TOKEN:?is not set}
@@ -58,6 +59,8 @@ for REPO in ${REPOS}; do
     EXIT_CODE=1
     printf "\n⚠️ Failed to sync ${REPO}\n\n"
     cd ..
+
+    FAILED_MESSAGE="${FAILED_MESSAGE}\n⚠️ Failed to sync ${REPO}\n\n"
     continue
   }
 
@@ -78,5 +81,5 @@ for REPO in ${REPOS}; do
   printf "\n✅ Successfully synced ${REPO}\n\n"
 done
 
-
+echo ${FAILED_MESSAGE}
 exit ${EXIT_CODE}
