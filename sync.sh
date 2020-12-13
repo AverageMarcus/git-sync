@@ -84,10 +84,13 @@ for REPO in ${REPOS}; do
   printf "\n✅ Successfully synced ${REPO}\n\n"
 done
 
-if [ ! -z "${FAILED_MESSAGE}" ];
+if [ ! -n "${FAILED_MESSAGE}" ];
 then
+  echo "Failed!"
   printf ${FAILED_MESSAGE}
   exit 1
+else
+  echo "All completed successfully!"
+  exit 0
 fi
 
-exit 0
