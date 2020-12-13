@@ -19,24 +19,27 @@ getDefaultBranch() {
 }
 
 githubGetRepo() {
-  curl -f -u averagemarcus:${GITHUB_TOKEN} "https://api.github.com/repos/averagemarcus/${1}" -H  "accept: application/vnd.github.v3+json" 1> /dev/null
+  curl -f -u averagemarcus:${GITHUB_TOKEN} "https://api.github.com/repos/averagemarcus/${1}" -H  "accept: application/vnd.github.v3+json" --silent 1> /dev/null
 }
 githubMakeRepo() {
-  curl -X POST -f -u averagemarcus:${GITHUB_TOKEN} "https://api.github.com/user/repos" -H  "accept: application/vnd.github.v3+json" -d '{"name": "'${1}'", "private": false, "auto_init": false, "delete_branch_on_merge": true}' 1> /dev/null
+  echo "Creating github repo"
+  curl -X POST -f -u averagemarcus:${GITHUB_TOKEN} "https://api.github.com/user/repos" -H  "accept: application/vnd.github.v3+json" -d '{"name": "'${1}'", "private": false, "auto_init": false, "delete_branch_on_merge": true}' --silent 1> /dev/null
 }
 
 bitbucketGetRepo() {
-  curl -f -u averagemarcus:${BITBUCKET_TOKEN} "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}" 1> /dev/null
+  curl -f -u averagemarcus:${BITBUCKET_TOKEN} "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}" --silent 1> /dev/null
 }
 bitbucketMakeRepo() {
-  curl -X POST -u averagemarcus:${BITBUCKET_TOKEN} -H "Content-Type: application/json" -d '{"scm": "git", "is_private": false,"project": {"key": "PROJ"}}' "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}" 1> /dev/null
+  echo "Creating bitbucket repo"
+  curl -X POST -u averagemarcus:${BITBUCKET_TOKEN} -H "Content-Type: application/json" -d '{"scm": "git", "is_private": false,"project": {"key": "PROJ"}}' "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}"  --silent1> /dev/null
 }
 
 gitlabGetRepo() {
-  curl -f "https://gitlab.com/api/v4/projects/averagemarcus/${1}?private_token=${GITLAB_TOKEN}" 1> /dev/null
+  curl -f "https://gitlab.com/api/v4/projects/averagemarcus/${1}?private_token=${GITLAB_TOKEN}" --silent 1> /dev/null
 }
 gitlabMakeRepo() {
-  curl -X POST --header "Content-Type: application/json" "https://gitlab.com/api/v4/projects?private_token=${GITLAB_TOKEN}" -d '{"name": "'${1}'", "visibility": "public"}' 1> /dev/null
+  echo "Creating gitlab repo"
+  curl -X POST --header "Content-Type: application/json" "https://gitlab.com/api/v4/projects?private_token=${GITLAB_TOKEN}" -d '{"name": "'${1}'", "visibility": "public"}' --silent 1> /dev/null
 }
 
 for REPO in ${REPOS}; do
@@ -86,3 +89,5 @@ then
   printf ${FAILED_MESSAGE}
   exit 1
 fi
+
+exit 0
