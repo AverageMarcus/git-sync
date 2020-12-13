@@ -35,7 +35,7 @@ bitbucketMakeRepo() {
 }
 
 gitlabGetRepo() {
-  curl -f "https://gitlab.com/api/v4/projects/averagemarcus%2F${1}?private_token=${GITLAB_TOKEN}" --silent 1> /dev/null
+  curl -f "https://gitlab.com/api/v4/projects/averagemarcus%2F$(echo ${1} |tr "." "-")?private_token=${GITLAB_TOKEN}" --silent 1> /dev/null
 }
 gitlabMakeRepo() {
   echo "Creating gitlab repo"
@@ -55,7 +55,7 @@ for REPO in ${REPOS}; do
   git remote add gitea "${GITEA_BASE}${REPO}" 1> /dev/null
   git remote add github "${GITHUB_BASE}${REPO}" 1> /dev/null
   git remote add bitbucket "${BITBUCKET_BASE}${REPO}" 1> /dev/null
-  git remote add gitlab "${GITLAB_BASE}${REPO}" 1> /dev/null
+  git remote add gitlab "${GITLAB_BASE}$(echo ${REPO} |tr "." "-")" 1> /dev/null
 
   failed() {
     printf "\n⚠️ Failed to sync ${REPO}\n\n"
@@ -86,6 +86,7 @@ done
 
 if [ -n "${FAILED_MESSAGE}" ];
 then
+  printf "\n\n--------\n\n"
   echo "Failed!"
   printf "${FAILED_MESSAGE}"
   exit 1
