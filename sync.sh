@@ -19,24 +19,24 @@ getDefaultBranch() {
 }
 
 githubGetRepo() {
-  curl -f -u averagemarcus:${GITHUB_TOKEN} "https://api.github.com/repos/averagemarcus/${1}" -H  "accept: application/vnd.github.v3+json"
+  curl -f -u averagemarcus:${GITHUB_TOKEN} "https://api.github.com/repos/averagemarcus/${1}" -H  "accept: application/vnd.github.v3+json" 1> /dev/null
 }
 githubMakeRepo() {
-  curl -X POST -f -u averagemarcus:${GITHUB_TOKEN} "https://api.github.com/user/repos" -H  "accept: application/vnd.github.v3+json" -d '{"name": "'${1}'", "private": false, "auto_init": false, "delete_branch_on_merge": true}'
+  curl -X POST -f -u averagemarcus:${GITHUB_TOKEN} "https://api.github.com/user/repos" -H  "accept: application/vnd.github.v3+json" -d '{"name": "'${1}'", "private": false, "auto_init": false, "delete_branch_on_merge": true}' 1> /dev/null
 }
 
 bitbucketGetRepo() {
-  curl -f -u averagemarcus:${BITBUCKET_TOKEN} "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}"
+  curl -f -u averagemarcus:${BITBUCKET_TOKEN} "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}" 1> /dev/null
 }
 bitbucketMakeRepo() {
-  curl -X POST -u averagemarcus:${BITBUCKET_TOKEN} -H "Content-Type: application/json" -d '{"scm": "git", "is_private": false,"project": {"key": "PROJ"}}' "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}"
+  curl -X POST -u averagemarcus:${BITBUCKET_TOKEN} -H "Content-Type: application/json" -d '{"scm": "git", "is_private": false,"project": {"key": "PROJ"}}' "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}" 1> /dev/null
 }
 
 gitlabGetRepo() {
-  curl -f "https://gitlab.com/api/v4/projects/averagemarcus/${1}?private_token=${GITLAB_TOKEN}"
+  curl -f "https://gitlab.com/api/v4/projects/averagemarcus/${1}?private_token=${GITLAB_TOKEN}" 1> /dev/null
 }
 gitlabMakeRepo() {
-  curl -X POST --header "Content-Type: application/json" "https://gitlab.com/api/v4/projects?private_token=${GITLAB_TOKEN}" -d '{"name": "'${1}'", "visibility": "public"}'
+  curl -X POST --header "Content-Type: application/json" "https://gitlab.com/api/v4/projects?private_token=${GITLAB_TOKEN}" -d '{"name": "'${1}'", "visibility": "public"}' 1> /dev/null
 }
 
 for REPO in ${REPOS}; do
@@ -45,7 +45,7 @@ for REPO in ${REPOS}; do
   rm -rf ${REPO}
   mkdir -p ${REPO}
   cd ${REPO}
-  git init
+  git init 1> /dev/null
 
   BRANCH=$(getDefaultBranch ${REPO})
 
@@ -66,22 +66,22 @@ for REPO in ${REPOS}; do
   gitlabGetRepo ${REPO} || gitlabMakeRepo ${REPO}
   bitbucketGetRepo ${REPO} || bitbucketMakeRepo ${REPO}
 
-  git pull --ff-only gitea ${BRANCH} || failed
-  git pull --ff-only github ${BRANCH} || printf "\nℹ️ Unable to pull from GitHub\n\n"
-  git pull --ff-only bitbucket ${BRANCH} || printf "\nℹ️ Unable to pull from BitBucket\n\n"
-  git pull --ff-only gitlab ${BRANCH} || printf "\nℹ️ Unable to pull from Gitlab\n\n"
+  git pull --ff-only gitea ${BRANCH} 1> /dev/null || failed
+  git pull --ff-only github ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from GitHub\n\n"
+  git pull --ff-only bitbucket ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from BitBucket\n\n"
+  git pull --ff-only gitlab ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Gitlab\n\n"
 
-  git push gitea ${BRANCH} || failed
-  git push github ${BRANCH} || failed
-  git push bitbucket ${BRANCH} || failed
-  git push gitlab ${BRANCH} || failed
+  git push gitea ${BRANCH} 1> /dev/null || failed
+  git push github ${BRANCH} 1> /dev/null || failed
+  git push bitbucket ${BRANCH} 1> /dev/null || failed
+  git push gitlab ${BRANCH} 1> /dev/null || failed
 
   cd ..
   rm -rf ${REPO}
   printf "\n✅ Successfully synced ${REPO}\n\n"
 done
 
-if [ ! -z ${FAILED_MESSAGE} ];
+if [ ! -z "${FAILED_MESSAGE}" ];
 then
   printf ${FAILED_MESSAGE}
   exit 1
