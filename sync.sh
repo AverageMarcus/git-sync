@@ -43,7 +43,7 @@ gitlabMakeRepo() {
 }
 
 for REPO in ${REPOS}; do
-  echo "Syncing ${REPO}"
+  printf "\nSyncing ${REPO}"
 
   rm -rf ${REPO}
   mkdir -p ${REPO}
@@ -52,10 +52,10 @@ for REPO in ${REPOS}; do
 
   BRANCH=$(getDefaultBranch ${REPO})
 
-  git remote add gitea "${GITEA_BASE}${REPO}"
-  git remote add github "${GITHUB_BASE}${REPO}"
-  git remote add bitbucket "${BITBUCKET_BASE}${REPO}"
-  git remote add gitlab "${GITLAB_BASE}${REPO}"
+  git remote add gitea "${GITEA_BASE}${REPO}" 1> /dev/null
+  git remote add github "${GITHUB_BASE}${REPO}" 1> /dev/null
+  git remote add bitbucket "${BITBUCKET_BASE}${REPO}" 1> /dev/null
+  git remote add gitlab "${GITLAB_BASE}${REPO}" 1> /dev/null
 
   failed() {
     printf "\n⚠️ Failed to sync ${REPO}\n\n"
@@ -84,7 +84,7 @@ for REPO in ${REPOS}; do
   printf "\n✅ Successfully synced ${REPO}\n\n"
 done
 
-if [ ! -n "${FAILED_MESSAGE}" ];
+if [ -n "${FAILED_MESSAGE}" ];
 then
   echo "Failed!"
   printf ${FAILED_MESSAGE}
