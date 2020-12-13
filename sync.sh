@@ -35,7 +35,7 @@ bitbucketMakeRepo() {
 }
 
 gitlabGetRepo() {
-  curl -f "https://gitlab.com/api/v4/projects/averagemarcus/${1}?private_token=${GITLAB_TOKEN}" --silent 1> /dev/null
+  curl -f "https://gitlab.com/api/v4/projects/averagemarcus%2F${1}?private_token=${GITLAB_TOKEN}" --silent 1> /dev/null
 }
 gitlabMakeRepo() {
   echo "Creating gitlab repo"
