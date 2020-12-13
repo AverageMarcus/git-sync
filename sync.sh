@@ -1,6 +1,5 @@
 #!/bin/bash
 
-EXIT_CODE=0
 FAILED_MESSAGE=""
 
 GITEA_TOKEN=${GITEA_TOKEN:?is not set}
@@ -56,7 +55,6 @@ for REPO in ${REPOS}; do
   git remote add gitlab "${GITLAB_BASE}${REPO}"
 
   failed() {
-    EXIT_CODE=1
     printf "\n⚠️ Failed to sync ${REPO}\n\n"
     cd ..
 
@@ -83,5 +81,8 @@ for REPO in ${REPOS}; do
   printf "\n✅ Successfully synced ${REPO}\n\n"
 done
 
-printf ${FAILED_MESSAGE}
-exit ${EXIT_CODE}
+if [ ! -z ${FAILED_MESSAGE} ];
+then
+  printf ${FAILED_MESSAGE}
+  exit 1
+fi
