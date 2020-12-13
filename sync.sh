@@ -87,7 +87,7 @@ done
 if [ -n "${FAILED_MESSAGE}" ];
 then
   echo "Failed!"
-  printf ${FAILED_MESSAGE}
+  printf "${FAILED_MESSAGE}"
   exit 1
 else
   echo "All completed successfully!"
