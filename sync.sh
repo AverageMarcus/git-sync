@@ -31,7 +31,7 @@ bitbucketGetRepo() {
 }
 bitbucketMakeRepo() {
   echo "Creating bitbucket repo"
-  curl -X POST -u averagemarcus:${BITBUCKET_TOKEN} -H "Content-Type: application/json" -d '{"scm": "git", "is_private": false,"project": {"key": "PROJ"}}' "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}"  --silent1> /dev/null
+  curl -X POST -u averagemarcus:${BITBUCKET_TOKEN} -H "Content-Type: application/json" -d '{"scm": "git", "is_private": false,"project": {"key": "PROJ"}}' "https://api.bitbucket.org/2.0/repositories/averagemarcus/${1}"  --silent 1> /dev/null
 }
 
 gitlabGetRepo() {
@@ -62,22 +62,21 @@ for REPO in ${REPOS}; do
     cd ..
 
     FAILED_MESSAGE="${FAILED_MESSAGE}\n⚠️ Failed to sync ${REPO}\n\n"
-    continue
   }
 
   githubGetRepo ${REPO} || githubMakeRepo ${REPO}
   gitlabGetRepo ${REPO} || gitlabMakeRepo ${REPO}
   bitbucketGetRepo ${REPO} || bitbucketMakeRepo ${REPO}
 
-  git pull --ff-only gitea ${BRANCH} 1> /dev/null || failed
+  git pull --ff-only gitea ${BRANCH} 1> /dev/null || { failed; continue; }
   git pull --ff-only github ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from GitHub\n\n"
   git pull --ff-only bitbucket ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from BitBucket\n\n"
   git pull --ff-only gitlab ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Gitlab\n\n"
 
-  git push gitea ${BRANCH} 1> /dev/null || failed
-  git push github ${BRANCH} 1> /dev/null || failed
-  git push bitbucket ${BRANCH} 1> /dev/null || failed
-  git push gitlab ${BRANCH} 1> /dev/null || failed
+  git push gitea ${BRANCH} 1> /dev/null || { failed; continue; }
+  git push github ${BRANCH} 1> /dev/null || { failed; continue; }
+  git push bitbucket ${BRANCH} 1> /dev/null || { failed; continue; }
+  git push gitlab ${BRANCH} 1> /dev/null || { failed; continue; }
 
   cd ..
   rm -rf ${REPO}
