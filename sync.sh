@@ -43,7 +43,7 @@ gitlabMakeRepo() {
 }
 
 for REPO in ${REPOS}; do
-  printf "\nSyncing ${REPO}"
+  printf "\n🔄 Syncing ${REPO}\n\n"
 
   rm -rf ${REPO}
   mkdir -p ${REPO}
@@ -74,9 +74,9 @@ for REPO in ${REPOS}; do
   git pull --ff-only gitlab ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Gitlab\n\n"
 
   git push gitea ${BRANCH} 1> /dev/null || { failed; continue; }
-  git push github ${BRANCH} 1> /dev/null || { failed; continue; }
-  git push bitbucket ${BRANCH} 1> /dev/null || { failed; continue; }
-  git push gitlab ${BRANCH} 1> /dev/null || { failed; continue; }
+  git push -f github ${BRANCH} 1> /dev/null || { failed; continue; }
+  git push -f bitbucket ${BRANCH} 1> /dev/null || { failed; continue; }
+  git push -f gitlab ${BRANCH} 1> /dev/null || { failed; continue; }
 
   cd ..
   rm -rf ${REPO}
