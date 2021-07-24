@@ -46,9 +46,9 @@ for REPO in ${REPOS}; do
   printf "\n🔄 Syncing ${REPO}\n\n"
 
   rm -rf ${REPO}
-  mkdir -p ${REPO}
+
+  git clone "${GITEA_BASE}${REPO}" ${REPO}
   cd ${REPO}
-  git init 1> /dev/null
 
   BRANCH=$(getDefaultBranch ${REPO})
 
