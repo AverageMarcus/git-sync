@@ -73,10 +73,10 @@ for REPO in ${REPOS}; do
   git pull --ff-only bitbucket ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from BitBucket\n\n"
   git pull --ff-only gitlab ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Gitlab\n\n"
 
-  git push gitea ${BRANCH} 1> /dev/null || { failed; continue; }
-  git push -f github ${BRANCH} 1> /dev/null || { failed; continue; }
-  git push -f bitbucket ${BRANCH} 1> /dev/null || { failed; continue; }
-  git push -f gitlab ${BRANCH} 1> /dev/null || { failed; continue; }
+  git push -f github ${BRANCH} 1> /dev/null || { failed; }
+  git push -f bitbucket ${BRANCH} 1> /dev/null || { failed; }
+  git push -f gitlab ${BRANCH} 1> /dev/null || { failed; }
+  git push gitea ${BRANCH} 1> /dev/null || { failed; }
 
   cd ..
   rm -rf ${REPO}
