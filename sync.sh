@@ -58,10 +58,10 @@ for REPO in ${REPOS}; do
   git remote add gitlab "${GITLAB_BASE}$(echo ${REPO} |tr "." "-")" 1> /dev/null
 
   failed() {
-    printf "\n⚠️ Failed to sync ${REPO}\n\n"
+    printf "\n⚠️ Failed to sync ${REPO} to ${1}\n\n"
     cd ..
 
-    FAILED_MESSAGE="${FAILED_MESSAGE}\n⚠️ Failed to sync ${REPO}\n\n"
+    FAILED_MESSAGE="${FAILED_MESSAGE}\n⚠️ Failed to sync ${REPO} to ${1}\n\n"
   }
 
   githubGetRepo ${REPO} || githubMakeRepo ${REPO}
@@ -73,10 +73,10 @@ for REPO in ${REPOS}; do
   git pull --ff-only bitbucket ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from BitBucket\n\n"
   git pull --ff-only gitlab ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Gitlab\n\n"
 
-  git push -f github ${BRANCH} 1> /dev/null || { failed; }
-  git push -f bitbucket ${BRANCH} 1> /dev/null || { failed; }
-  git push -f gitlab ${BRANCH} 1> /dev/null || { failed; }
-  git push gitea ${BRANCH} 1> /dev/null || { failed; }
+  git push -f --set-upstream github ${BRANCH} 1> /dev/null || { failed "github"; }
+  git push -f --set-upstream bitbucket ${BRANCH} 1> /dev/null || { failed "bitbucket"; }
+  git push -f --set-upstream gitlab ${BRANCH} 1> /dev/null || { failed "gitlab"; }
+  git push  --set-upstream gitea ${BRANCH} 1> /dev/null || { failed "gitea"; }
 
   cd ..
   rm -rf ${REPO}
