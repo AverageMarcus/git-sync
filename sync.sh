@@ -40,6 +40,10 @@ gitlabGetRepo() {
 gitlabMakeRepo() {
   echo "Creating gitlab repo"
   curl -X POST --header "Content-Type: application/json" "https://gitlab.com/api/v4/projects?private_token=${GITLAB_TOKEN}" -d '{"name": "'${1}'", "visibility": "public"}' --silent 1> /dev/null
+
+  PROJECT_ID=$(curl --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "https://gitlab.com/api/v4/projects/averagemarcus%2F${1}" | jq .id -r)
+  curl --request POST --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --header "Content-Type: application/json" "https://gitlab.com/api/v4/projects/${PROJECT_ID}/protected_branches?name=master&push_access_level=40&merge_access_level=40&allow_force_push=true"
+  curl --request POST --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --header "Content-Type: application/json" "https://gitlab.com/api/v4/projects/${PROJECT_ID}/protected_branches?name=main&push_access_level=40&merge_access_level=40&allow_force_push=true"
 }
 
 for REPO in ${REPOS}; do
