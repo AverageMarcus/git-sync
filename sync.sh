@@ -6,11 +6,13 @@ GITEA_TOKEN=${GITEA_TOKEN:?is not set}
 GITHUB_TOKEN=${GITHUB_TOKEN:?is not set}
 BITBUCKET_TOKEN=${BITBUCKET_TOKEN:?is not set}
 GITLAB_TOKEN=${GITLAB_TOKEN:?is not set}
+CODEBERG_TOKEN=${CODEBERG_TOKEN:?is not set}
 
 GITEA_BASE="https://averagemarcus:${GITEA_TOKEN}@git.cluster.fun/AverageMarcus/"
 GITHUB_BASE="https://averagemarcus:${GITHUB_TOKEN}@github.com/AverageMarcus/"
 BITBUCKET_BASE="https://averagemarcus:${BITBUCKET_TOKEN}@bitbucket.org/AverageMarcus/"
 GITLAB_BASE="https://averagemarcus:${GITLAB_TOKEN}@gitlab.com/AverageMarcus/"
+CODEBERG_BASE="https://averagemarcus:${CODEBERG_TOKEN}@codeberg.org/AverageMarcus/"
 
 REPOS=$(curl -X GET "https://git.cluster.fun/api/v1/user/repos?page=1&limit=50&access_token=${GITEA_TOKEN}" -H  "accept: application/json" --silent | jq -r '.[] | select(.private!=true) | .name')
 
@@ -46,6 +48,16 @@ gitlabMakeRepo() {
   curl --request POST --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --header "Content-Type: application/json" "https://gitlab.com/api/v4/projects/${PROJECT_ID}/protected_branches?name=main&push_access_level=40&merge_access_level=40&allow_force_push=true"
 }
 
+codebergGetRepo() {
+  curl -f -X GET "https://codeberg.org/api/v1/repos/averagemarcus/${1}?access_token=${CODEBERG_TOKEN}" -H 'accept: application/json' --silent 1> /dev/null
+}
+codebergMakeRepo() {
+  echo "Creating codeberg repo"
+  curl -X POST "https://codeberg.org/api/v1/user/repos?access_token=${CODEBERG_TOKEN}" \
+    -H "Content-Type: application/json" -H 'accept: application/json' \
+    -d '{"auto_init": false, "private": false, "name": "'${1}'"}' --silent 1> /dev/null
+}
+
 for REPO in ${REPOS}; do
   printf "\n🔄 Syncing ${REPO}\n\n"
 
@@ -60,6 +72,7 @@ for REPO in ${REPOS}; do
   git remote add github "${GITHUB_BASE}${REPO}" 1> /dev/null
   git remote add bitbucket "${BITBUCKET_BASE}${REPO}" 1> /dev/null
   git remote add gitlab "${GITLAB_BASE}$(echo ${REPO} |tr "." "-")" 1> /dev/null
+  git remote add codeberg "${CODEBERG_BASE}${REPO}" 1> /dev/null
 
   failed() {
     printf "\n⚠️ Failed to sync ${REPO} to ${1}\n\n"
@@ -71,15 +84,18 @@ for REPO in ${REPOS}; do
   githubGetRepo ${REPO} || githubMakeRepo ${REPO}
   gitlabGetRepo ${REPO} || gitlabMakeRepo ${REPO}
   bitbucketGetRepo ${REPO} || bitbucketMakeRepo ${REPO}
+  codebergGetRepo ${REPO} || codebergMakeRepo ${REPO}
 
   git pull --ff-only gitea ${BRANCH} 1> /dev/null || { failed; continue; }
   git pull --ff-only github ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from GitHub\n\n"
   git pull --ff-only bitbucket ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from BitBucket\n\n"
   git pull --ff-only gitlab ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Gitlab\n\n"
+  git pull --ff-only codeberg ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Codeberg\n\n"
 
   git push -f --set-upstream github ${BRANCH} 1> /dev/null || { failed "github"; }
   git push -f --set-upstream bitbucket ${BRANCH} 1> /dev/null || { failed "bitbucket"; }
   git push -f --set-upstream gitlab ${BRANCH} 1> /dev/null || { failed "gitlab"; }
+  git push -f --set-upstream codeberg ${BRANCH} 1> /dev/null || { failed "codeberg"; }
   git push  --set-upstream gitea ${BRANCH} 1> /dev/null || { failed "gitea"; }
 
   cd ..
