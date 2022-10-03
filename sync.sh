@@ -72,7 +72,7 @@ for REPO in ${REPOS}; do
   git remote add github "${GITHUB_BASE}${REPO}" 1> /dev/null
   git remote add bitbucket "${BITBUCKET_BASE}${REPO}" 1> /dev/null
   git remote add gitlab "${GITLAB_BASE}$(echo ${REPO} |tr "." "-")" 1> /dev/null
-  git remote add codeberg "${CODEBERG_BASE}${REPO}" 1> /dev/null
+  # git remote add codeberg "${CODEBERG_BASE}${REPO}" 1> /dev/null
 
   failed() {
     printf "\n⚠️ Failed to sync ${REPO} to ${1}\n\n"
@@ -84,18 +84,18 @@ for REPO in ${REPOS}; do
   githubGetRepo ${REPO} || githubMakeRepo ${REPO}
   gitlabGetRepo ${REPO} || gitlabMakeRepo ${REPO}
   bitbucketGetRepo ${REPO} || bitbucketMakeRepo ${REPO}
-  codebergGetRepo ${REPO} || codebergMakeRepo ${REPO}
+  # codebergGetRepo ${REPO} || codebergMakeRepo ${REPO}
 
   git pull --ff-only gitea ${BRANCH} 1> /dev/null || { failed; continue; }
   git pull --ff-only github ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from GitHub\n\n"
   git pull --ff-only bitbucket ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from BitBucket\n\n"
   git pull --ff-only gitlab ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Gitlab\n\n"
-  git pull --ff-only codeberg ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Codeberg\n\n"
+  # git pull --ff-only codeberg ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Codeberg\n\n"
 
   git push -f --set-upstream github ${BRANCH} 1> /dev/null || { failed "github"; }
   git push -f --set-upstream bitbucket ${BRANCH} 1> /dev/null || { failed "bitbucket"; }
   git push -f --set-upstream gitlab ${BRANCH} 1> /dev/null || { failed "gitlab"; }
-  git push -f --set-upstream codeberg ${BRANCH} 1> /dev/null || { failed "codeberg"; }
+  # git push -f --set-upstream codeberg ${BRANCH} 1> /dev/null || { failed "codeberg"; }
   git push  --set-upstream gitea ${BRANCH} 1> /dev/null || { failed "gitea"; }
 
   cd ..
