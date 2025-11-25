@@ -14,7 +14,18 @@ BITBUCKET_BASE="https://averagemarcus:${BITBUCKET_TOKEN}@bitbucket.org/AverageMa
 GITLAB_BASE="https://averagemarcus:${GITLAB_TOKEN}@gitlab.com/AverageMarcus/"
 CODEBERG_BASE="https://averagemarcus:${CODEBERG_TOKEN}@codeberg.org/AverageMarcus/"
 
-REPOS=$(curl -X GET "https://git.cluster.fun/api/v1/user/repos?page=1&limit=100&access_token=${GITEA_TOKEN}" -H  "accept: application/json" --silent | jq -r '.[] | select(.private!=true) | .name')
+REPOS=""
+PAGE=1
+while :
+do
+  REPO_PAGE=$(curl -X GET "https://git.cluster.fun/api/v1/user/repos?page=${PAGE}&limit=50&access_token=${GITEA_TOKEN}" -H  "accept: application/json" --silent | jq -r '.[] | select(.private!=true) | .name')
+  if [[ "${REPO_PAGE}" == "" ]]; then
+    break
+  fi
+  REPOS="${REPOS}\n${REPO_PAGE}"
+  PAGE=$((PAGE + 1))
+done
+
 
 getDefaultBranch() {
   curl -X GET "https://git.cluster.fun/api/v1/repos/AverageMarcus/${1}?access_token=${GITEA_TOKEN}" -H  "accept: application/json" --silent | jq -r '.default_branch'
