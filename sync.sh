@@ -102,11 +102,11 @@ for REPO in ${REPOS}; do
   git pull --ff-only gitlab ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Gitlab\n\n"
   # git pull --ff-only codeberg ${BRANCH} 1> /dev/null || printf "\nℹ️ Unable to pull from Codeberg\n\n"
 
-  git push -f --set-upstream github ${BRANCH} 1> /dev/null || { failed "github"; }
-  git push -f --set-upstream bitbucket ${BRANCH} 1> /dev/null || { failed "bitbucket"; }
-  git push -f --set-upstream gitlab ${BRANCH} 1> /dev/null || { failed "gitlab"; }
-  # git push -f --set-upstream codeberg ${BRANCH} 1> /dev/null || { failed "codeberg"; }
-  git push  --set-upstream gitea ${BRANCH} 1> /dev/null || { failed "gitea"; }
+  git push --follow-tags --set-upstream gitea ${BRANCH} 1> /dev/null || { failed "gitea"; }
+  git push -f --follow-tags --set-upstream github ${BRANCH} 1> /dev/null || { failed "github"; }
+  git push -f --follow-tags --set-upstream bitbucket ${BRANCH} 1> /dev/null || { failed "bitbucket"; }
+  git push -f --follow-tags --set-upstream gitlab ${BRANCH} 1> /dev/null || { failed "gitlab"; }
+  # git push -f --follow-tags --set-upstream codeberg ${BRANCH} 1> /dev/null || { failed "codeberg"; }
 
   cd ..
   rm -rf ${REPO}
