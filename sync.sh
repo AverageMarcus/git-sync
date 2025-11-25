@@ -25,7 +25,7 @@ do
   REPOS="${REPOS}\n${REPO_PAGE}"
   PAGE=$((PAGE + 1))
 done
-
+REPOS=($(echo ${REPOS}))
 
 getDefaultBranch() {
   curl -X GET "https://git.cluster.fun/api/v1/repos/AverageMarcus/${1}?access_token=${GITEA_TOKEN}" -H  "accept: application/json" --silent | jq -r '.default_branch'
